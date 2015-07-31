@@ -10,7 +10,7 @@
 
 #include <vector>
 #include <iostream>
-#include "TObject.h"
+#include "TNamed.h"
 
 class TAxis;
 class TH1;
@@ -19,14 +19,14 @@ class TH2;
 
 namespace QuickRefold {
 
-class Refold : public TObject{
+class Refold : public TNamed{
 public:
 
   //status of the object
   enum Status {NONE, SETUP, FILLING, READING};
 
   Refold(); //required by root, don't use
-  Refold(int numAxes, bool storeCovMatrix = false);//stadard constructor
+  Refold(const char *name, int numAxes, bool storeCovMatrix = false);//stadard constructor
   virtual ~Refold();
 
 
@@ -78,8 +78,8 @@ public:
 
 
   //Functions to fill the object
-  void addAxis(unsigned int axis, const TString& axisName, unsigned int nBins, float minAxis, float maxAxis);
-  void addAxis(unsigned int axis, const TString& axisName, unsigned int nBins, float* axisValues);
+  void addAxis(unsigned int axis, const char *name, unsigned int nBins, float minAxis, float maxAxis);
+  void addAxis(unsigned int axis, const char *name, unsigned int nBins, float* axisValues);
   void stopSetup(); //You are done adding axes
   void setError(float in); //fills diagonal, from binCache
   void setValue(float in); //from binCache
@@ -103,7 +103,6 @@ private:
   //Stored values
   unsigned int nAxes;
   TAxis * axes;
-  TString * axisNames;
   float * values;
   bool storeFullCov;
   float * covarianceMatrix;
