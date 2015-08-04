@@ -4,6 +4,7 @@
  *  Created on: Jul 31, 2015
  *      Author: nmccoll
  */
+#include <stdexcept>
 
 #include "TLegend.h"
 #include "THStack.h"
