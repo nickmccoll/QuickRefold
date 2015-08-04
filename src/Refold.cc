@@ -10,7 +10,6 @@
 #include "TAxis.h"
 #include "TH1F.h"
 #include "TH2F.h"
-#include "TMath.h"
 #include "TClass.h"
 #include "../interface/Refold.h"
 
@@ -56,7 +55,7 @@ Refold::~Refold(){
   }
   void Refold::setBin(const unsigned int& axis, const float& input) const{
     if(axis >= nAxes) throw std::invalid_argument(TString::Format("Refold::setBin: tried to access axis %u but only %u exist.",axis,nAxes).Data());
-    binCache->at(axis) = findAxisBin(axis,input);
+    setBinValFast(axis,input);
   }
   float Refold::getValue() const {
     return values[getBin(*binCache)];
@@ -117,7 +116,18 @@ Refold::~Refold(){
     return TString::Format("%.4g - %.4g", axes[axis].GetBinLowEdge(bin), axes[axis].GetBinLowEdge(bin));
   }
 
+
   //Functions to print or draw the stored values
+  TString Refold::getBinTitle(unsigned int iB) const{
+    TString title;
+    fillBinCache(iB);
+    for(unsigned int iA = 0; iA < nAxes; ++iA){
+      title += "(";
+      title +=  getAxisBinTitle(iA,binCache->at(iA)) ;
+      title +=")";
+    }
+    return title;
+  }
   void Refold::printValues(std::ostream& output) const {
     output          << TString::Format("%u Axes:",nAxes) << std::endl;
     for(unsigned int iA = 0; iA < nAxes; ++iA){
@@ -125,11 +135,8 @@ Refold::~Refold(){
     }
     output << std::endl;
     for(unsigned int iB = 0; iB < nBins; ++iB){
-      fillBinCache(iB);
-      for(unsigned int iA = 0; iA < nAxes; ++iA){
-        output << "("<<getAxisBinTitle(iA,binCache->at(iA)) <<")";
-      }
-      output <<"\t"<< values[iB] <<"\t+\\-\t"<<errors[iB] << std::endl;
+      output << getBinTitle(iB);
+      output <<"\t"<< values[iB] <<"\t+\\-\t"<<TMath::Sqrt(errors[iB]) << std::endl;
     }
   }
   void Refold::printCovariance(std::ostream& output) const {
@@ -141,24 +148,17 @@ Refold::~Refold(){
     output << std::endl;
 
     for(unsigned int iB = 0; iB < nBins; ++iB){
-      fillBinCache(iB);
       output <<"\t\t";
-      for(unsigned int iA = 0; iA < nAxes; ++iA){
-        output << "("<<getAxisBinTitle(iA,binCache->at(iA)) <<")";
-      }
+      output << getBinTitle(iB);
       output <<"\t";
     }
     output << std::endl;
 
     for(unsigned int iB1 = 0; iB1 < nBins; ++iB1){
-      fillBinCache(iB1);
-      for(unsigned int iA = 0; iA < nAxes; ++iA){
-        output << "("<<getAxisBinTitle(iA,binCache->at(iA)) <<")";
-      }
+      output << getBinTitle(iB1);
       output <<"\t";
       for(unsigned int iB2 = 0; iB2 < nBins; ++iB2){
-        int covBin = getCovBin(iB1,iB2);
-        output << covarianceMatrix[covBin] <<"\t";
+        output << TString::Format("%.2f",covarianceMatrix[getCovBin(iB1,iB2)]) <<"\t";
       }
       output << std::endl;
     }
@@ -172,7 +172,7 @@ Refold::~Refold(){
     histo->Sumw2();
     for(unsigned int iB = 0; iB < nBins; ++iB){
       histo->SetBinContent(iB+1,values[iB]);
-      histo->SetBinError(iB+1,errors[iB]);
+      histo->SetBinError(iB+1,TMath::Sqrt(errors[iB]));
     }
     histo->SetEntries(nBins);
     return histo;
@@ -198,11 +198,23 @@ Refold::~Refold(){
     for(unsigned int iB = 0; iB < nBins; ++iB){
       fillBinCache(iB);
       histo->SetBinContent(binCache->at(0),binCache->at(1),values[iB]);
-      histo->SetBinError(binCache->at(0),binCache->at(1),errors[iB]);
+      histo->SetBinError(binCache->at(0),binCache->at(1),TMath::Sqrt(errors[iB]));
     }
     histo->SetEntries(nBins);
     return histo;
   }
+  TH2* Refold::drawCov(const TString& name, const TString& title) const {
+    if(!storeFullCov) throw std::invalid_argument("Refold::drawCov: The covariance matrix was not stored." );
+    TH2 * histo = new TH2F(name,title,nBins,-.5, float(nBins) -.5,nBins,-.5, float(nBins) -.5);
+    histo->Sumw2();
+    for(unsigned int iB1 = 0; iB1 < nBins; ++iB1){
+      for(unsigned int iB2 = 0; iB2 < nBins; ++iB2){
+      histo->SetBinContent(iB1 + 1, iB2 + 1, covarianceMatrix[getCovBin(iB1,iB2)]);
+    }
+    }
+    return histo;
+  }
+
 
   //Functions to fill the object
   void Refold::addAxis(unsigned int axis, const char *name, unsigned int nBins, float minAxis, float maxAxis) {
@@ -217,21 +229,40 @@ Refold::~Refold(){
     axes[axis].Set(nBins,axisValues);
     axes[axis].SetName(name);
   }
-  void Refold::stopSetup() {
+  void Refold::addAxis(unsigned int axis, const TAxis * inAxis){
+    if(status != SETUP) throw std::invalid_argument("Refold::addAxis: Not in SETUP mode." );
+    if(axis >= nAxes) throw std::invalid_argument(TString::Format("Refold::addAxis: tried to setup axis %u but only %u exist.",axis,nAxes).Data());
+    axes[axis] = *inAxis;
+  }
+
+  void Refold::stopSetup(bool setupOnlyAxes) {
     if(status != SETUP) throw std::invalid_argument("Refold::stopSetup: Not in SETUP mode." );
     status = FILLING;
 
     nBins = 1;
     metrics[0] = 1;
     for(unsigned int iA = 0; iA < nAxes;){
+      if(axes[iA].GetNbins() == 0) throw std::invalid_argument("Refold::stopSetup: Not all axes have been setup." );
       nBins *= axes[iA].GetNbins();
       if (++iA < nAxes)
         metrics[iA] = nBins;
     }
 
+    if(setupOnlyAxes) return;
+
     errors = new float[nBins];
     values = new float[nBins];
-    if(storeFullCov) covarianceMatrix = new float[nBins*nBins];
+    for(unsigned int iB = 0; iB < nBins; ++iB){
+      errors[iB]  = 0;
+      values[iB]  = 0;
+    }
+
+    if(storeFullCov){
+      covarianceMatrix = new float[nBins*nBins];
+      for(unsigned int iB = 0; iB < nBins*nBins; ++iB){
+        covarianceMatrix[iB]  = 0;
+      }
+    }
   }
   void Refold::setError(float in){
     if(status != FILLING) throw std::invalid_argument("Refold::setError: Not in FILLING mode." );
@@ -328,6 +359,9 @@ Refold::~Refold(){
       R__b.ReadFastArray(values,nBins);
       if(storeFullCov){
         R__b.ReadFastArray(covarianceMatrix,nBins*nBins);
+        for(unsigned int iB = 0; iB < nBins; ++iB){
+          errors[iB] = covarianceMatrix[getCovBin(iB,iB)];
+        }
       } else {
         R__b.ReadFastArray(errors,nBins);
       }

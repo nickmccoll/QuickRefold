@@ -11,11 +11,12 @@
 #include <vector>
 #include <iostream>
 #include "TNamed.h"
+#include "TMath.h"
 
 class TAxis;
 class TH1;
 class TH2;
-
+class MakeRefold;
 
 namespace QuickRefold {
 
@@ -45,6 +46,7 @@ public:
   void setBin(const unsigned int& axis, const float& input) const;
   float getValue() const;
   float getError() const;
+  float getSqrtError() const {return TMath::Sqrt(getError());}
 
   //or you can just do it all yourself for optimization
   float getValue(const std::vector<unsigned int>& bins ) const;
@@ -59,11 +61,11 @@ public:
   unsigned int findAxisBin(const TAxis& axis, double input) const; //modification of FindFixBin to ignore under/overflow
   TString getAxisBinTitle(unsigned int axis, float input) const;
   TString getAxisBinTitle(unsigned int axis, unsigned int bin) const;
-
+  unsigned int getNumberOfBins() const {return nBins;};
 
 
   //Functions to print or draw the stored values
-
+  TString getBinTitle(unsigned int iB) const;
   // print all values in a list
   void printValues(std::ostream& output = std::cout) const;
   //print covariance matrix
@@ -75,12 +77,16 @@ public:
   // makes a new TH1, so you have to delete it on your own
   //only works in the case of exactly two axes
   TH2* draw2D(const TString& name, const TString& title) const;
+  TH2* drawCov(const TString& name, const TString& title) const;
 
 
   //Functions to fill the object
+  //errors are always in the form of cov matrix entries, so even when you
+  //do not store the cov matrix you should input sig^2
   void addAxis(unsigned int axis, const char *name, unsigned int nBins, float minAxis, float maxAxis);
   void addAxis(unsigned int axis, const char *name, unsigned int nBins, float* axisValues);
-  void stopSetup(); //You are done adding axes
+  void addAxis(unsigned int axis, const TAxis * inAxis);
+  void stopSetup(bool setupOnlyAxes = false); //You are done adding axes
   void setError(float in); //fills diagonal, from binCache
   void setValue(float in); //from binCache
   void setError(unsigned int bin1,unsigned int bin2, float in); //fills covariance
@@ -94,9 +100,13 @@ public:
   unsigned int translateToCovBin(unsigned int bin1,unsigned int bin2) const;
 
 private:
+  void  setBinIntFast(unsigned int axis,unsigned int bin) const {binCache->at(axis) = bin;};
+  void  setBinValFast(unsigned int axis,float input) const {binCache->at(axis) = findAxisBin(axis,input);};
   unsigned int getBin(const std::vector<unsigned int>& inBins) const;
+  unsigned int getBin() const {return getBin(*binCache);}
   unsigned int getCovBin(unsigned int bin1,unsigned int bin2) const;
   void fillBinCache(unsigned int inBin) const;
+
 
 
 private:
@@ -115,11 +125,7 @@ private:
   mutable std::vector<unsigned int> * binCache;
 
 
-
-
-
-
-
+  friend class MakeRefold;
 
 public:
   ClassDef(Refold,1)
