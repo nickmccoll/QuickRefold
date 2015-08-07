@@ -242,7 +242,7 @@ Refold::~Refold(){
     nBins = 1;
     metrics[0] = 1;
     for(unsigned int iA = 0; iA < nAxes;){
-      if(axes[iA].GetNbins() == 0) throw std::invalid_argument("Refold::stopSetup: Not all axes have been setup." );
+      if(!axes[iA].GetName()[0]) throw std::invalid_argument("Refold::stopSetup: Not all axes have been setup." );
       nBins *= axes[iA].GetNbins();
       if (++iA < nAxes)
         metrics[iA] = nBins;

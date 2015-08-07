@@ -291,6 +291,19 @@ void MakeRefold::drawDiag() const {
   cRes->Update();
   cRes->RedrawAxis();
 }
+void MakeRefold::writeDiag(TString fileName, TString option){
+  TFile * outFile = new TFile(fileName,option);
+  outFile->cd();
+  input_truth->Write("input_truth");
+  unfoldTruth->Write("unfold_truth");
+  input_meas->Write("input_measure");
+  unfoldReco->Write("unfold_measure");
+  meas->Write("measure");
+  input_resp->Write("input_response");
+  outFile->Close();
+  delete outFile;
+}
+
 void MakeRefold::writeCorr(TString fileName, TString openOpt, TString corrName, bool storeCov) {
   if(unfoldCache == 0)
     throw std::invalid_argument("MakeRefold::writeCorr : trying to write, but you have not unfolded yet.");

@@ -64,6 +64,8 @@ public:
   void unfold(RooUnfold::Algorithm alg, double regparm= -1e30, double minMeas = 5, double  minResp = 5) const;
   //Draw before and after histograms
   void drawDiag() const;
+  //Or write them to a file
+  void writeDiag(TString filename, TString option);
 
   //Output
   //Write out the correction

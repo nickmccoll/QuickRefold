@@ -122,8 +122,8 @@ public:
 
     a->unfold(RooUnfold::kBayes,4,0,0);
     a->drawDiag();
+    a->writeDiag("outDiag.root","recreate");
     a->writeCorr("outCorr.root","recreate","testCorr",true);
-
 
     if(oldA){
       TLegend * legMeas = new TLegend(0.30,0.25,.55,0.45);
@@ -178,3 +178,33 @@ public:
   void makeRefoldTest(){
     test a;
   }
+
+/* script to test the output
+ *
+  {
+    TFile * f = new TFile("outCorr.root","read");
+    QuickRefold::Refold * a;
+    f->GetObject("testCorr",a);
+
+
+    TH1 * h = a.draw("test","test");
+    h->Draw();
+
+    new TCanvas();
+    TH2 * h2 = a.draw2D("test2","test2");
+    h2->Draw("COLZ");
+
+    new TCanvas();
+    TH2 * h3 = a.drawCov("cov","cov");
+    h3->Draw("COLZ");
+
+    a.printValues();
+        // a.printCovariance();
+
+
+    // f->Close();
+
+}
+ *
+ */
+
