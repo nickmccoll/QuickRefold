@@ -31,9 +31,9 @@ CXXFLAGS += -I../.. -I.
 # 	$(LD) $(SOFLAGS)$@ $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS) $(ROOTGLIBS)
 
 
-all: $(CINTDIR)QuickRefoldDict.cc $(LIBDIR)QuickRefoldDict.o $(LIBDIR)Refold.o  $(LIBDIR)MakeRefold.o libQuickRefold.so
+all: $(CINTDIR)QuickRefoldDict.cc $(LIBDIR)QuickRefoldDict.o $(LIBDIR)Refold.o $(LIBDIR)FormulaContainer.o  $(LIBDIR)MakeRefold.o libQuickRefold.so
 
-$(CINTDIR)QuickRefoldDict.cc: $(INTDIR)Refold.h $(INTDIR)MakeRefold.h $(SRCDIR)QuickRefold_LinkDef.h
+$(CINTDIR)QuickRefoldDict.cc: $(INTDIR)BaseCorrector.h $(INTDIR)FormulaContainer.h $(INTDIR)Refold.h $(INTDIR)MakeRefold.h $(SRCDIR)QuickRefold_LinkDef.h
 	@echo "Generating dictionary $@..."
 	$(ROOTCINT) -v -l -f $@ -c -I../.. $^ 
 
@@ -42,11 +42,14 @@ $(LIBDIR)QuickRefoldDict.o: $(CINTDIR)QuickRefoldDict.cc
 			
 $(LIBDIR)Refold.o: $(SRCDIR)Refold.cc
 	$(CXX)  $(CXXFLAGS) -c $<  -o $@
+	
+$(LIBDIR)FormulaContainer.o: $(SRCDIR)FormulaContainer.cc
+	$(CXX)  $(CXXFLAGS) -c $<  -o $@
 
 $(LIBDIR)MakeRefold.o: $(SRCDIR)MakeRefold.cc
 	$(CXX)  $(CXXFLAGS) -c $<  -o $@
 
-libQuickRefold.so:	$(LIBDIR)Refold.o $(LIBDIR)MakeRefold.o $(LIBDIR)QuickRefoldDict.o 
+libQuickRefold.so:	$(LIBDIR)FormulaContainer.o $(LIBDIR)Refold.o $(LIBDIR)MakeRefold.o $(LIBDIR)QuickRefoldDict.o 
 ifeq ($(PLATFORM),macosx)
 	$(LD) $(SOFLAGS)$@ $(LDFLAGS) $(ROOUNFOLDDIR)libRooUnfold.so $^ $(OutPutOpt) $@ $(EXPLLINKLIBS)
 else

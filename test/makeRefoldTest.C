@@ -118,7 +118,7 @@ public:
       dTest->Fill(x);
     }
 
-    f->Close();
+    if(f) f->Close();
 
     a->unfold(RooUnfold::kBayes,4,0,0);
     a->drawDiag();

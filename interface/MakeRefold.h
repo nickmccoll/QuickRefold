@@ -9,7 +9,6 @@
 #define QUICKREFOLD_INTERFACE_MAKEREFOLD_H_
 #include "TH2F.h"
 #include "AnalysisTools/RooUnfold/src/RooUnfold.h"
-
 #include "Refold.h"
 
 
