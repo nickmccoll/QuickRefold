@@ -1,0 +1,58 @@
+#ifndef QUICKREFOLD_SRC_TOBJECTCONTAINER_ICC_
+#define QUICKREFOLD_SRC_TOBJECTCONTAINER_ICC_
+
+#include <stdexcept>
+
+#include "../interface/TObjectContainer.h"
+
+namespace QuickRefold {
+
+template<typename data>
+TObjectContainer<data>::TObjectContainer() : BaseCorrector<data>()
+{};
+
+template<typename data>
+TObjectContainer<data>::TObjectContainer(const char *name, int numAxes) : BaseCorrector<data>(numAxes)
+{BaseCorrector<data>::SetName(name);};
+
+template<typename data>
+TObjectContainer<data>::~TObjectContainer(){
+};
+
+template<typename data>
+void TObjectContainer<data>::stopSetup(bool setupOnlyAxes) {
+  BaseCorrector<data>::stopSetup(setupOnlyAxes);
+}
+
+// Streamer
+template<typename data>
+void TObjectContainer<data>::Streamer(TBuffer& R__b){
+  if (R__b.IsReading())
+  {
+    R__b.ReadVersion();
+    TObject::Class()->ReadBuffer(R__b, this);
+    R__b >> BaseCorrector<data>::nAxes;
+
+    BaseCorrector<data>::axes = new TAxis [BaseCorrector<data>::nAxes];
+    R__b.ReadFastArray(BaseCorrector<data>::axes,TAxis::Class(),BaseCorrector<data>::nAxes);
+
+    BaseCorrector<data>::status = BaseCorrector<data>::SETUP;
+    BaseCorrector<data>::metrics = new unsigned int [BaseCorrector<data>::nAxes];
+    BaseCorrector<data>::binCache = new std::vector<unsigned int>(BaseCorrector<data>::nAxes,1u);
+    stopSetup();
+
+    R__b.ReadFastArray(BaseCorrector<data>::values,data::Class(),BaseCorrector<data>::nBins);
+    BaseCorrector<data>::status = BaseCorrector<data>::READING;
+
+  } else {
+    R__b.WriteVersion(IsA());
+    TObject::Class()->WriteBuffer(R__b, this);
+    R__b                <<  BaseCorrector<data>::nAxes;
+    R__b.WriteFastArray(BaseCorrector<data>::axes,TAxis::Class(),BaseCorrector<data>::nAxes);
+    R__b.WriteFastArray(BaseCorrector<data>::values,data::Class(),BaseCorrector<data>::nBins);
+  }
+}
+
+} /* namespace QuickRefold */
+
+#endif
