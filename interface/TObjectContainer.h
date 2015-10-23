@@ -13,6 +13,7 @@
 #include "TH2F.h"
 #include "TH2D.h"
 #include "TF1.h"
+#include "TFormula.h"
 
 #include "BaseCorrector.h"
 
@@ -35,6 +36,7 @@ typedef TObjectContainer<TH1D>   TH1DContainer;
 typedef TObjectContainer<TH2F>   TH2FContainer;
 typedef TObjectContainer<TH2D>   TH2DContainer;
 typedef TObjectContainer<TF1 >   TF1Container ;
+typedef TObjectContainer<TFormula >   TFormulaContainer ;
 } /* namespace QuickRefold */
 
 #include "../src/TObjectContainer.icc"
