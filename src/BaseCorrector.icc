@@ -32,7 +32,8 @@ BaseCorrector<data>::~BaseCorrector(){
 template<typename data>
   const data& BaseCorrector<data>::getValue(const float& input) const {
     if(nAxes != 1) throw std::invalid_argument("This version of BaseCorrector<data>::getValue assumes only one axis");
-    return values[findAxisBin(0,input)];
+    binCache->at(0) = findAxisBin(0,input);
+    return values[getBin(*binCache)];
   }
 template<typename data>
   const data& BaseCorrector<data>::getValue(const float& input0, const float& input1) const {
