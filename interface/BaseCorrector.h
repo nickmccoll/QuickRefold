@@ -29,6 +29,8 @@ public:
 
   BaseCorrector(); //required by root, don't use
   BaseCorrector(int numAxes);//stadard constructor
+  BaseCorrector(const BaseCorrector& a);
+  BaseCorrector& operator= (const BaseCorrector& a);
   virtual ~BaseCorrector();
 
   //Functions to access values and errors

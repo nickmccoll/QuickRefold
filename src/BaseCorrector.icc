@@ -19,6 +19,52 @@ template<typename data>
 BaseCorrector<data>::BaseCorrector(int numAxes) : nAxes(numAxes), axes(new TAxis [nAxes]),  values(0),
     status(SETUP), nBins(0),metrics(new unsigned int [nAxes]),binCache(new std::vector<unsigned int>(nAxes,1u))
 {};
+template<typename data>
+BaseCorrector<data>::BaseCorrector(const BaseCorrector& a)
+{
+  nAxes = a.nAxes;
+  axes = new TAxis [nAxes];
+  metrics = new unsigned int [nAxes];
+  for(unsigned int iA = 0; iA < nAxes; ++iA){
+    axes[iA] = a.axes[iA];
+    metrics[iA] = a.metrics[iA];
+  }
+  binCache = new std::vector<unsigned int>(nAxes,1u);
+  (*binCache) = (*a.binCache);
+
+  nBins = a.nBins;
+  values = new data[nBins];
+  for(unsigned int iB = 0; iB < nBins; ++iB){
+    values[iB] = a.values[iB];
+  }
+  status = a.status;
+}
+template<typename data>
+BaseCorrector<data>& BaseCorrector<data>::operator= (const BaseCorrector& a){
+  if (this != &a) {
+    nAxes = a.nAxes;
+    delete axes;
+    axes = new TAxis [nAxes];
+    delete metrics;
+    metrics = new unsigned int [nAxes];
+    for(unsigned int iA = 0; iA < nAxes; ++iA){
+      axes[iA] = a.axes[iA];
+      metrics[iA] = a.metrics[iA];
+    }
+
+    delete binCache;
+    binCache = new std::vector<unsigned int>(nAxes,1u);
+    (*binCache) = (*a.binCache);
+
+    nBins = a.nBins;
+    delete values;
+    values = new data[nBins];
+    for(unsigned int iB = 0; iB < nBins; ++iB){
+      values[iB] = a.values[iB];
+    }
+    status = a.status;
+  }
+}
 
 template<typename data>
 BaseCorrector<data>::~BaseCorrector(){

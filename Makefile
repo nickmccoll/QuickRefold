@@ -14,9 +14,9 @@ include $(ROOTSYS)/etc/Makefile.arch
 
 CXXFLAGS += -I../.. -I.
 
-all: $(CINTDIR)QuickRefoldDict.cc $(LIBDIR)QuickRefoldDict.o $(LIBDIR)Refold.o $(LIBDIR)TObjectContainer.o  $(LIBDIR)MakeRefold.o libQuickRefold.so
+all: $(CINTDIR)QuickRefoldDict.cc $(LIBDIR)QuickRefoldDict.o $(LIBDIR)Refold.o $(LIBDIR)TObjectContainer.o $(LIBDIR)TF1Container.o  $(LIBDIR)MakeRefold.o libQuickRefold.so
 
-$(CINTDIR)QuickRefoldDict.cc: $(INTDIR)BaseCorrector.h $(INTDIR)TObjectContainer.h $(INTDIR)Refold.h $(INTDIR)MakeRefold.h $(SRCDIR)QuickRefold_LinkDef.h
+$(CINTDIR)QuickRefoldDict.cc: $(INTDIR)BaseCorrector.h $(INTDIR)TObjectContainer.h $(INTDIR)TF1Container.h $(INTDIR)Refold.h $(INTDIR)MakeRefold.h $(SRCDIR)QuickRefold_LinkDef.h
 	@echo "Generating dictionary $@..."
 	rootcint -v -l -f $@ -c -I../.. $^ 
 
@@ -28,11 +28,14 @@ $(LIBDIR)Refold.o: $(SRCDIR)Refold.cc
 	
 $(LIBDIR)TObjectContainer.o: $(SRCDIR)TObjectContainer.cc
 	$(CXX)  $(CXXFLAGS) -c $<  -o $@
+	
+$(LIBDIR)TF1Container.o: $(SRCDIR)TF1Container.cc
+	$(CXX)  $(CXXFLAGS) -c $<  -o $@
 
 $(LIBDIR)MakeRefold.o: $(SRCDIR)MakeRefold.cc
 	$(CXX)  $(CXXFLAGS) -c $<  -o $@
 
-libQuickRefold.so:	$(LIBDIR)TObjectContainer.o $(LIBDIR)Refold.o $(LIBDIR)MakeRefold.o $(LIBDIR)QuickRefoldDict.o 
+libQuickRefold.so:	$(LIBDIR)TObjectContainer.o $(LIBDIR)TF1Container.o $(LIBDIR)Refold.o $(LIBDIR)MakeRefold.o $(LIBDIR)QuickRefoldDict.o 
 ifeq ($(PLATFORM),macosx)
 	$(LD) $(SOFLAGS)$@ $(LDFLAGS) $(ROOUNFOLDDIR)libRooUnfold.so $^ $(OutPutOpt) $@ $(EXPLLINKLIBS)
 else
