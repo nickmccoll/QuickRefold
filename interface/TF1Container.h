@@ -15,6 +15,10 @@ public:
   virtual ~TF1Container();
   //Functions to fill the object
   void stopSetup(bool setupOnlyAxes = false); //You are done adding axes
+  float eval(float x) const {return values[getBin(*binCache)].Eval(x);}
+  float eval(float x,float y) const {return values[getBin(*binCache)].Eval(x,y);}
+  float eval(float x,float y, float z) const {return values[getBin(*binCache)].Eval(x,y,z);}
+
 public:
   ClassDef(TF1Container,1)
 };
