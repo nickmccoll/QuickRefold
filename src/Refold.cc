@@ -11,6 +11,7 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TClass.h"
+#include "TBuffer.h"
 #include "../interface/Refold.h"
 
 namespace QuickRefold {

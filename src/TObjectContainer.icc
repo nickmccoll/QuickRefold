@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 
+#include "TBuffer.h"
 #include "../interface/TObjectContainer.h"
 
 namespace QuickRefold {

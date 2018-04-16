@@ -43,9 +43,9 @@ template<typename data>
 BaseCorrector<data>& BaseCorrector<data>::operator= (const BaseCorrector& a){
   if (this != &a) {
     nAxes = a.nAxes;
-    delete axes;
+    delete[] axes;
     axes = new TAxis [nAxes];
-    delete metrics;
+    delete[] metrics;
     metrics = new unsigned int [nAxes];
     for(unsigned int iA = 0; iA < nAxes; ++iA){
       axes[iA] = a.axes[iA];

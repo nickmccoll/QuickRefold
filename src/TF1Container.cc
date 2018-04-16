@@ -1,4 +1,5 @@
 #include "../interface/TF1Container.h"
+#include "TBuffer.h"
 
 #include <stdexcept>
 
