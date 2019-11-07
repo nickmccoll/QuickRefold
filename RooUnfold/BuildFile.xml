@@ -1,0 +1,8 @@
+<use   name="root"/>
+<lib name="Unfold"/>
+<flags   CXXFLAGS="-I."/>
+<flags SKIP_FILES="RooUnfoldDagostini.cxx"/>
+<flags   CPPDEFINES="HAVE_TSVDUNFOLD -DNOROOFIT -DMAKEBUILD"/>
+<export>
+  <lib name="1"/>
+</export>
