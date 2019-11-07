@@ -18,7 +18,4 @@ And in a few source files we had to include a TBuffer.h include: `#include "TBuf
 
 This may not be necessary if you use an upgraded version of the code. This version is based off of revision 352:  
 
-https://svnsrv.desy.de/websvn/wsvn/General.unfolding/RooUnfold/trunk/?rev=352&peg=351#a492aac1ba1bd652177a5ed6211b80be4
-
-
-
+https://gitlab.cern.ch/RooUnfold/RooUnfold/commit/c4469a1f9729a0646b509e25b2adc306b0623b19
